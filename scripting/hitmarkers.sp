@@ -130,7 +130,8 @@ public void Event_PlayerHurt(Handle event, const char[] name, bool broadcast)
 
 public void Event_EntityDamage(const char[] output, int caller, int activator, float delay)
 {
-    hitmarker(activator, true);
+    if (g_bBHitmarker[activator])
+        hitmarker(activator, true);
 }
 
 public void HitmarkerMenuHandler(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
