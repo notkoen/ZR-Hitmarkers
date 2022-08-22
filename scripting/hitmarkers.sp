@@ -58,6 +58,12 @@ public void OnConfigsExecuted()
     g_iChannel = g_cvChannel.IntValue;
 }
 
+public void OnClientDisconnect(int client)
+{
+    g_bZHitmarker[client] = true;
+    g_bBHitmarker[client] = true;
+}
+
 public void OnConvarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
     if (cvar == g_cvChannel)
