@@ -14,14 +14,13 @@ ConVar g_cvChannel;
 
 bool g_bZHitmarker[MAXPLAYERS+1] = {true, ...};
 bool g_bBHitmarker[MAXPLAYERS+1] = {true, ...};
-int g_iChannel;
 
 public Plugin myinfo =
 {
-    name = "[ZR] Simple Hitmarkers",
+    name = "[ZR] Hitmarkers",
     author = "koen",
     description = "Hitmarkers for ZE",
-    version = "1.0",
+    version = "1.1",
     url = "https://steamcommunity.com/id/notkoen/"
 };
 
@@ -30,8 +29,7 @@ public void OnPluginStart()
     g_hitmarker_cookie = RegClientCookie("hitmarker_cookies", "[Hitmarker] Cookies for boss and zombie hitmarkers", CookieAccess_Private);
 
     g_cvChannel = CreateConVar("sm_hitmarker_channel", "1", "Hitmarker channel to be displayed on", _, true, 0.0, true, 5.0);
-    HookConVarChange(g_cvChannel, OnConvarChange);
-    AutoExecConfig(true, "Simple Hitmarker");
+    AutoExecConfig(true, "Hitmarkers");
 
     HookEvent("player_hurt", Event_PlayerHurt);
     HookEntityOutput("func_physbox", "OnHealthChanged", Event_EntityDamage);
@@ -53,21 +51,10 @@ public void OnPluginStart()
     }
 }
 
-public void OnConfigsExecuted()
-{
-    g_iChannel = g_cvChannel.IntValue;
-}
-
 public void OnClientDisconnect(int client)
 {
     g_bZHitmarker[client] = true;
     g_bBHitmarker[client] = true;
-}
-
-public void OnConvarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
-{
-    if (cvar == g_cvChannel)
-        g_iChannel = g_cvChannel.IntValue;
 }
 
 stock bool IsValidClient(int client)
@@ -82,9 +69,9 @@ void hitmarker(int client, bool boss)
     SetHudTextParams(-1.0, -1.0, 0.3, 255, 0, 0, 255, 0, 0.1, 0.1, 0.1);
 
     if (boss)
-        ShowHudText(client, GetDynamicChannel(g_iChannel), "◞  ◟\n◝  ◜");
+        ShowHudText(client, GetDynamicChannel(g_cvChannel.IntValue), "◞  ◟\n◝  ◜");
     else
-        ShowHudText(client, GetDynamicChannel(g_iChannel), "∷");
+        ShowHudText(client, GetDynamicChannel(g_cvChannel.IntValue), "∷");
 }
 
 void SaveClientCookies(int client)
@@ -154,9 +141,9 @@ public void HitmarkerMenuHandler(int client, CookieMenuAction action, any info, 
 public void HitmarkerMenu(int client)
 {
     Menu menu = CreateMenu(MenuHandler);
-    menu.SetTitle("Hitmarkers Settings\n\n ");
-    SetMenuExitBackButton(menu, true);
-    SetMenuExitButton(menu, true);
+    menu.SetTitle("Hitmarkers Settings\n ");
+    menu.ExitBackButton(true);
+    menu.ExitButton(true);
 
     char buffer[64];
 
