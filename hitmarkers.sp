@@ -5,7 +5,6 @@
 #include <sdktools>
 #include <clientprefs>
 #include <DynamicChannels>
-#include <csgocolors_fix>
 #include <zombiereloaded>
 
 Handle g_hitmarker_cookie;
@@ -21,14 +20,14 @@ public Plugin myinfo =
     author = "koen",
     description = "Hitmarkers for ZE",
     version = "1.1",
-    url = "https://steamcommunity.com/id/notkoen/"
+    url = "https://github.com/notkoen"
 };
 
 public void OnPluginStart()
 {
-    g_hitmarker_cookie = RegClientCookie("hitmarker_cookies", "[Hitmarker] Cookies for boss and zombie hitmarkers", CookieAccess_Private);
+    g_hitmarker_cookie = RegClientCookie("hitmarker_cookies", "Cookies for boss and zombie hitmarkers", CookieAccess_Private);
 
-    g_cvChannel = CreateConVar("sm_hitmarker_channel", "1", "Hitmarker channel to be displayed on", _, true, 0.0, true, 5.0);
+    g_cvChannel = CreateConVar("sm_hitmarker_channel", "1", "game_text channel for hitmarkers to be displayed on", _, true, 0.0, true, 5.0);
     AutoExecConfig(true, "Hitmarkers");
 
     HookEvent("player_hurt", Event_PlayerHurt);
@@ -68,10 +67,8 @@ void hitmarker(int client, bool boss)
 {
     SetHudTextParams(-1.0, -1.0, 0.3, 255, 0, 0, 255, 0, 0.1, 0.1, 0.1);
 
-    if (boss)
-        ShowHudText(client, GetDynamicChannel(g_cvChannel.IntValue), "◞  ◟\n◝  ◜");
-    else
-        ShowHudText(client, GetDynamicChannel(g_cvChannel.IntValue), "∷");
+    if (boss) ShowHudText(client, GetDynamicChannel(g_cvChannel.IntValue), "◞  ◟\n◝  ◜");
+    else ShowHudText(client, GetDynamicChannel(g_cvChannel.IntValue), "∷");
 }
 
 void SaveClientCookies(int client)
@@ -114,17 +111,14 @@ public void Event_PlayerHurt(Handle event, const char[] name, bool broadcast)
     int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
     int victim = GetClientOfUserId(GetEventInt(event, "userid"));
     
-    if (!IsValidClient(attacker) || !IsValidClient(victim))
-        return;
+    if (!IsValidClient(attacker) || !IsValidClient(victim)) return;
 
-    if (g_bZHitmarker[attacker] && ZR_IsClientZombie(victim))
-        hitmarker(attacker, false);
+    if (g_bZHitmarker[attacker] && ZR_IsClientZombie(victim)) hitmarker(attacker, false);
 }
 
 public void Event_EntityDamage(const char[] output, int caller, int activator, float delay)
 {
-    if (g_bBHitmarker[activator])
-        hitmarker(activator, true);
+    if (g_bBHitmarker[activator]) hitmarker(activator, true);
 }
 
 public void HitmarkerMenuHandler(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
@@ -167,25 +161,18 @@ public int MenuHandler(Handle menu, MenuAction action, int client, int selection
             if (StrEqual(info, "zm"))
             {
                 g_bZHitmarker[client] = !g_bZHitmarker[client];
-                CPrintToChat(client, "{green}[Hitmarker] {lightgreen}Zombie hitmarker is now %s{lightgreen}.", g_bZHitmarker[client] ? "{blue}enabled" : "{red}disabled");
+                CPrintToChat(client, " \x02[Hitmarker] \x01Zombie hitmarker is now %s\x01.", g_bZHitmarker[client] ? "\x04enabled" : "\x02disabled");
             }
             else if (StrEqual(info, "boss"))
             {
                 g_bBHitmarker[client] = !g_bBHitmarker[client];
-                CPrintToChat(client, "{green}[Hitmarker] {lightgreen}Boss hitmarker is now %s{lightgreen}.", g_bBHitmarker[client] ? "{blue}enabled" : "{red}disabled");
+                CPrintToChat(client, " \x02[Hitmarker] \x01Boss hitmarker is now %s\x01.", g_bBHitmarker[client] ? "\x04enabled" : "\x02disabled");
             }
             SaveClientCookies(client);
             HitmarkerMenu(client);
         }
-        case MenuAction_Cancel:
-        {
-            if (selection == MenuCancel_ExitBack)
-                ShowCookieMenu(client);
-        }
-        case MenuAction_End:
-        {
-            CloseHandle(menu);
-        }
+        case MenuAction_Cancel: if (selection == MenuCancel_ExitBack) ShowCookieMenu(client);
+        case MenuAction_End: CloseHandle(menu);
     }
     return 0;
 }
